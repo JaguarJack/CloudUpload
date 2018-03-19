@@ -7,17 +7,18 @@ use Lizyu\Icloud\Traits\Utility;
 final class QiniuAuth
 {
     use Utility;
+    
     /**
-     * @description:管理凭证授权
-     * @author wuyanwen(2018年3月13日)
-     * @param unknown $url
-     * @param unknown $body
-     * @param unknown $contentType
+     * @description:授权凭证
+     * @author: wuyanwen <wuyanwen1992@gmail.com>
+     * @date:2018年3月19日
+     * @param string $uri
+     * @param string $method
      * @return string[]
      */
-    public static function authorization(string $uri, string $body = '', $contentType = 'application/x-www-form-urlencoded')
+    public static function authorization(string $uri, string $method)
     {
-        return ['Authorization' => sprintf('QBox %s', self::getAccessToken($uri, $body, $contentType))];
+        return ['Authorization' => sprintf('QBox %s', self::getAccessToken($uri, '', 'application/x-www-form-urlencoded'))];
     }
     
     /**
@@ -28,7 +29,7 @@ final class QiniuAuth
      * @param unknown $contentType
      * @return string
      */
-    protected static function getAccessToken(string $urlString, string $body, string $contentType = '')
+    public static function getAccessToken(string $urlString, string $body, string $contentType = '')
     {
         $appKey = config('icloud.qiniu.qiNiuKey');
         $appSecret = config('icloud.qiniu.qiNiuSecret');

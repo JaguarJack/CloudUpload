@@ -26,7 +26,7 @@ final class UpyunAuth
     {
        $date = gmdate('D, d M Y H:i:s \G\M\T');
        
-       $singArr = [$method, $uri, $date];
+       $singArr = [$method, parse_url($uri)['path'], $date];
 
        if ($contentMD5) $singArr[] = $contentMD5;
 

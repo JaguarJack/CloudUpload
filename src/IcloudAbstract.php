@@ -3,8 +3,7 @@
 namespace Lizyu\Icloud;
 
 use Lizyu\Icloud\HttpClient\Client;
-use Lizyu\Icloud\Auth\QiniuAuth as QinuAuth;
-use Lizyu\Icloud\Auth\UpyunAuth as UpyunAuth;
+use Lizyu\Icloud\Auth\AuthFactory;
 use Lizyu\Icloud\Traits\Utility;
 use Lizyu\Icloud\Exceptions\NotFoundException;
 
@@ -63,13 +62,14 @@ abstract class IcloudAbstract
         $client         = new Client;
         $client->uri    = $uri;
         $client->method = $method;
+        
         if (isset($options['headers']['Authorization'])) {
             $client->params = $options;
         } else {
-            $headers = config('icloud.dirver') == 'qiniu' ? QinuAuth::authorization($uri) : UpyunAuth::authorization(parse_url($uri)['path'], $method);
+            $headers = AuthFactory::authorization($uri, $method);
             $client->params = array_merge_recursive(['headers' => $headers], $options);
         }
-
+        
         return $client->send();
     }
     
