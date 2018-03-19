@@ -74,17 +74,13 @@ abstract class IcloudAbstract
     }
     
     /**
-     * @description:获取上传凭证
+     * @description:上传凭证
      * @author: wuyanwen <wuyanwen1992@gmail.com>
-     * @date:2018年3月17日
-     * @param string $bucket
-     * @param string $key
-     * @param int $expires
-     * @param string $policy
-     * @param bool $strictPolicy
-     * @return string
+     * @date:2018年3月19日
+     * @param unknown ...$argument
+     * @return unknown
      */
-    public function UploadToken(...$argument){
-        return QinuAuth::uploadToken(...$argument);
+    public function uploadToken(...$argument){
+        return AuthFactory::uploadToken(...$argument);
     }
 }
