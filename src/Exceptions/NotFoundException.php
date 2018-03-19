@@ -10,9 +10,9 @@ class NotFoundException extends \Exception
      * @date:2018年3月11日
      * @return \Lizyu\Permission\Exceptions\UnauthorizedException
      */
-    public static function NotFoundKey(string $msg)
+    public static function NotFoundKey(string $msg, $code = 404)
     {
-        return new static($msg, 500, null);
+        return new static($msg, $code, null);
     }
     
     /**
@@ -21,8 +21,13 @@ class NotFoundException extends \Exception
      * @param string $msg
      * @return \Lizyu\Icloud\Exceptions\NotFoundException
      */
-    public static function NotFoundMethod(string $msg)
+    public static function NotFoundMethod(string $msg, int $code = 404)
     {
-        return new static($msg, 500, null);
+        return new static($msg, $code, null);
+    }
+    
+    public static function NotFoundExtension(string $msg, $code = 404)
+    {
+        return new static($msg, $code, null);
     }
 }

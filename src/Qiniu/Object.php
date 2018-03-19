@@ -4,10 +4,12 @@ namespace Lizyu\Icloud\Qiniu;
 
 use Lizyu\Icloud\IcloudAbstract;
 use GuzzleHttp\Psr7\Stream;
-use GuzzleHttp\Psr7\StreamWrapper;
+use Lizyu\Icloud\Exceptions\NotFoundException;
+use finfo;
 
 final class Object extends IcloudAbstract
 {
+    const BLOCK_SIZE = 4 * 1024 * 1024;
     
     /**
      * @description:列出空间所有资源
@@ -22,9 +24,7 @@ final class Object extends IcloudAbstract
     {
         $uri = sprintf($this->getApiUri('list', 'rsf'), $bucket, $marker, $limit, $prefix, $delimiter);
         
-        $response = $this->send( $uri, self::GET_METHOD );
-        
-        dd($response->getBody()->getContents());
+        return $this->send($uri, self::GET_METHOD );
     }
     
     /**
@@ -41,9 +41,7 @@ final class Object extends IcloudAbstract
         
         $uri = sprintf($this->getApiUri('stat'), $encodedEntryUri);
         
-        $response = $this->send( $uri, self::GET_METHOD );
-        
-        dd($response->getBody()->getContents());
+        return $this->send($uri, self::GET_METHOD );
     }
     
     /**
@@ -61,9 +59,7 @@ final class Object extends IcloudAbstract
         
         $uri = sprintf($this->getApiUri('move'), $encodedEntryURISrc, $encodedEntryURIDest);
         
-        $response = $this->send( $uri, self::POST_METHOD );
-        
-        dd($response);
+        return $this->send($uri, self::POST_METHOD );
     }
     
     /**
@@ -80,9 +76,8 @@ final class Object extends IcloudAbstract
         $encodedEntryURIDest = $this->encodedEntry($destBucket, $destResourceName ? : $localResourceName);
         
         $uri = sprintf($this->getApiUri('copy'), $encodedEntryURISrc, $encodedEntryURIDest);
-        $response = $this->send( $uri, self::POST_METHOD);
         
-        dd($response);
+        return $this->send($uri, self::POST_METHOD);
     }
     
     /**
@@ -96,9 +91,8 @@ final class Object extends IcloudAbstract
         $encodedEntryUri = $this->encodedEntry($bucket, $resourceName);
         
         $uri = sprintf($this->getApiUri('delete'), $encodedEntryUri);
-        $response = $this->send( $uri, self::POST_METHOD);
         
-        dd($response);
+        return $this->send($uri, self::POST_METHOD);
     }
     
     /**
@@ -113,8 +107,8 @@ final class Object extends IcloudAbstract
         $encodedEntryUri = self::urlSafeBase64Encode($destBucket);
         
         $uri = sprintf($this->getApiUri('fetch', 'iovip'), $imgEncodedUri, $encodedEntryUri);
-        $response = $this->send( $uri, self::POST_METHOD);
-        dd($response);
+        
+        return $this->send($uri, self::POST_METHOD);
     }
     
     /**
@@ -148,8 +142,8 @@ final class Object extends IcloudAbstract
         }
         
         $uri = sprintf('%s?%s', $this->getApiUri('batch'), $requestParams);
-        $response = $this->send( $uri, self::POST_METHOD);
-        dd($response->getBody()->getContents());
+        
+        return $this->send($uri, self::POST_METHOD);
     }
     
     /**
@@ -163,9 +157,8 @@ final class Object extends IcloudAbstract
         $encodedEntryUri = $this->encodedEntry($bucket, $resourceName);
         
         $uri = sprintf($this->getApiUri('prefetch', 'iovip'), $encodedEntryUri);
-        $response = $this->send( $uri, self::POST_METHOD);
         
-        dd($response->getBody()->getContents());
+        return $this->send($uri, self::POST_METHOD);
     }
     
     /**
@@ -178,8 +171,17 @@ final class Object extends IcloudAbstract
      */
     public function uploadFile(string $bucket, $file, array $params = [])
     {
+        if (!is_resource($file)) {
+            throw new \Exception('$file Must Be Resource Type');
+        }
+        
         $uri = $this->getApiUri('', 'up');
         $stream = new Stream($file);
+        //判断如果文件大于4M则使用分块上传
+        if ($stream->getSize() > self::BLOCK_SIZE) {
+            return $this->uploadFileByBlocks($bucket, $file);
+        }
+        
         $filename = md5(basename($stream->getMetadata('uri')) . time());
         $uploadToken = $this->UploadToken($bucket);
         
@@ -190,90 +192,76 @@ final class Object extends IcloudAbstract
             ['name' => 'crc32', 'contents' => self::crc32_data($stream)],
             ['name' => 'Content-Type', 'contents' => 'application/octet-stream'],
         ];
+        
         if (!empty($params)) {
             $options['multipart'] = array_merge($params, $options['multipart']);
         }
-        $response = $this->send($uri, self::POST_METHOD, $options);
-        dd($response);
+        
+        return $this->send($uri, self::POST_METHOD, $options);
     }
     
+   
     /**
-     * @description:
-     * @author: wuyanwen <wuyanwen1992@gmail.com>
-     * @date:2018年3月18日
-     */
-    public function createBlock($file)
-    {
-        $blocksize = 4 * 1024 * 1024;
-        $uri = sprintf($this->getApiUri('mkblk', 'up'), $blocksize);
-        
-        $stream = new Stream($file);
-        
-        
-        $chunkSize = 1 * 1024 * 10;
-        
-        $data = $stream->read($chunkSize);
-        $options['multipart'] = [
-            ['name' => 'firstChunkBinary', 'contents' =>  $data],
-        ];
-        $headers = [
-            'Content-Type'   => 'application/octet-stream',
-            'Content-Length' => $chunkSize,
-        ];
-        $options['headers']  = $headers;
-        $response = $this->send($uri, self::POST_METHOD, $options);
-        
-        dd($response->getBody()->getContents());
-    }
-    
-    /**
-     * @description:上传片
+     * @description:创建块
      * @author: wuyanwen <wuyanwen1992@gmail.com>
      * @date:2018年3月18日
      * @param unknown $nextChunkOffset
      */
-    public function createCtx(string $bucket, $file)
+    protected function uploadFileByBlocks(string $bucket, $file)
     {
-        $blocksize = 4 * 1024 * 1024;
-        $chunkSize = 1 * 1024 * 1024;
-        $uri = sprintf($this->getApiUri('mkblk', 'up'), $blocksize);
-        
+        //需要安装fileinfo扩展
+        if (!extension_loaded('fileinfo')) {
+            throw NotFoundException::NotFoundExtension('PHPExtension Fileinfo Not Found, Please Install It First');
+        }
         $stream = new Stream($file);
+        $filezie = $stream->getSize();
+        //保存ctx值， 用于后续合并文件
         $ctxArr = [];
-        while ($content = $stream->read($blocksize)) {
-            $_blocksize = $chunkSize;
+        //已上传文件大小
+        $uploadSize = 0;
+        while ($uploadSize < $filezie) {
+            //剩余文件大小
+            $remainsize = $filezie - $uploadSize;
+            //需要读取的文件大小
+            $needReadSize = $remainsize > self::BLOCK_SIZE ? self::BLOCK_SIZE : $remainsize;
+            $content = $stream->read($needReadSize);
             //创建块并且上传第一个片
-            $options['multipart'] = [
-                ['name' => 'firstChunkBinary', 'contents' =>  $content],
-            ];
+            $options['body'] = $content;
             $headers = [
                 'Content-Type'   => 'application/octet-stream',
-                'Content-Length' => $chunkSize,
+                'Content-Length' => $needReadSize,
             ];
             $options['headers']  = $headers;
+            $uri = sprintf($this->getApiUri('mkblk', 'up'), $needReadSize);
             $response = $this->send($uri, self::POST_METHOD, $options);
-            $json = json_decode($response->getBody()->getContents(), true);
-            $ctxArr[] = $json['ctx'];
+            $data = json_decode($response->getBody()->getContents(), true);
+            
+            array_push($ctxArr, $data['ctx']);
+            $uploadSize += $needReadSize;
         }
         
-        $this->mkfile($stream, $bucket, $ctxArr);
-        dd($ctxArr);die;
+        return $this->mkfile($stream, $bucket, $ctxArr);
     }
     
+    /**
+     * @description:创建文件
+     * @author wuyanwen(2018年3月19日)
+     * @param Stream $stream
+     * @param string $bucket
+     * @param array $ctx
+     */
     protected function mkfile(Stream $stream, string $bucket, array $ctx)
     {
-        $key = self::urlSafeBase64Encode(sprintf('%s:%s', $bucket, basename($stream->getMetadata('uri'))));
+        $file     = $stream->getMetadata('uri');
+        $key      = self::urlSafeBase64Encode(sprintf('%s', basename($file)));
+        $mimetype = (new finfo(FILEINFO_MIME_TYPE))->file($file);
         $filesize = $stream->getSize();
+        $userVar  = md5(time());
+        
+        $options['headers'] = ['Authorization' => 'UpToken ' . $this->UploadToken($bucket, basename($file))];
         $options['body'] = implode(',', $ctx);
-        $uri = sprintf($this->getApiUri('mkfile', 'up'), $filesize, $key, self::urlSafeBase64Encode('text/plain'));
-        dd($uri);
-        $response = $this->send($uri, self::POST_METHOD, $options);
-        dd($response);
-    }
-    
-    public function __call($method, $argument)
-    {
-        return $this->$method(...$argument);
-    }
-    
+        
+        $uri = sprintf($this->getApiUri('mkfile', 'up'), $filesize, $key, self::urlSafeBase64Encode($mimetype), self::urlSafeBase64Encode($userVar));
+        return $this->send($uri, self::POST_METHOD, $options);
+    }    
 }

@@ -37,11 +37,11 @@ abstract class IcloudAbstract
     protected function getApiUri($key, $host = 'rs', bool $isHttps = false)
     {
         if (!array_key_exists($host, $this->host)) {
-            throw NotFoundException::NotFoundKey("Host Not Found In Config File");
+            throw NotFoundException::NotFoundKey("Host Key '{$host}' Not Found In Config File");
         }
 
         if ($key && !isset($this->api[$key])) {
-            throw NotFoundException::NotFoundKey("Key '{$key}' Not Found In This Api Array");
+            throw NotFoundException::NotFoundKey("Api Key '{$key}' Not Found In This Api Array");
         }
         
         return !$key ? self::getHost($host, $isHttps) : self::getHost($host, $isHttps) . $this->api[$key];
@@ -58,13 +58,18 @@ abstract class IcloudAbstract
         return self::urlSafeBase64Encode(sprintf('%s:%s', $bucket, $resourceName));
     }
     
-    public function send(string $uri, string $method, array $options = [])
+    protected function send(string $uri, string $method, array $options = [])
     {
         $client         = new Client;
         $client->uri    = $uri;
         $client->method = $method;
-        $headers        = config('icloud.dirver') == 'qiniu' ? QinuAuth::authorization($uri) : UpyunAuth::authorization(parse_url($uri)['path'], $method);
-        $client->params = array_merge_recursive(['headers' => $headers], $options);
+        if (isset($options['headers']['Authorization'])) {
+            $client->params = $options;
+        } else {
+            $headers = config('icloud.dirver') == 'qiniu' ? QinuAuth::authorization($uri) : UpyunAuth::authorization(parse_url($uri)['path'], $method);
+            $client->params = array_merge_recursive(['headers' => $headers], $options);
+        }
+
         return $client->send();
     }
     
@@ -79,13 +84,7 @@ abstract class IcloudAbstract
      * @param bool $strictPolicy
      * @return string
      */
-    protected function UploadToken(
-        string $bucket,
-        string $key = '',
-        int $expires = 3600,
-        string $policy = '',
-        bool $strictPolicy = true
-    ){
-        return QinuAuth::uploadToken($bucket);
+    public function UploadToken(...$argument){
+        return QinuAuth::uploadToken(...$argument);
     }
 }
