@@ -53,8 +53,7 @@ class ResourceManager extends IcloudAbstract
         $options['headers'] = ['Content-Length' => $stream->getSize()];
         $options['body']    = $this->stream;
         
-        $response = $this->send($uri, self::PUT_METHOD, $this->options);
-        dd($response);
+        return $this->send($uri, self::PUT_METHOD, $this->options);
     }
     
     /**
@@ -152,9 +151,8 @@ class ResourceManager extends IcloudAbstract
             'x-upyun-multi-uuid'  => $this->multiuuid,
         ];
         $this->options['headers'] = $headrs;
-        $uri = sprintf($this->getApiUri('upload_file', 'v0'), $this->bucket, $this->fileDir . $this->filename);
-        $response = $this->send($uri, self::POST_METHOD, $this->options);
         
-        dd($response->getHeaders());
+        $uri = sprintf($this->getApiUri('upload_file', 'v0'), $this->bucket, $this->fileDir . $this->filename);
+        return $this->send($uri, self::POST_METHOD, $this->options);
     }
 }

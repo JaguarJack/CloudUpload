@@ -16,9 +16,7 @@ final class BucketManager extends IcloudAbstract
     {
         $uri = $this->getApiUri('buckets');
 
-        $response = $this->send( $uri, self::GET_METHOD );
-        
-        dd($response->getBody()->getContents());
+        return $this->send( $uri, self::GET_METHOD );
     }
     
     /**
@@ -31,9 +29,7 @@ final class BucketManager extends IcloudAbstract
     {
         $uri = sprintf($this->getApiUri('create_bucket'), self::urlSafeBase64Encode($bucket), $region);
         
-        $response = $this->send( $uri, self::POST_METHOD );
-        
-        dd($response);
+        return $this->send( $uri, self::POST_METHOD );
     }
     
     /**
@@ -44,9 +40,8 @@ final class BucketManager extends IcloudAbstract
     public function drop(string $bucket)
     {
         $uri = sprintf($this->getApiUri('drop_bucket'), $bucket);
-        $response = $this->send( $uri, self::POST_METHOD );
         
-        dd($response);
+        return$this->send( $uri, self::POST_METHOD );
     }
     
     /**
@@ -57,9 +52,8 @@ final class BucketManager extends IcloudAbstract
     public function getDomainListOfBucket(string $bucket)
     {
         $uri = sprintf($this->getApiUri('get_bucket_domain', 'api'), $bucket);
-        $response = $this->send( $uri, self::GET_METHOD );
         
-        dd($response->getBody()->getContents());
+        return $this->send( $uri, self::GET_METHOD );
     }
     
     /**
@@ -73,9 +67,8 @@ final class BucketManager extends IcloudAbstract
         if (!in_array($private, [0, 1])) return false;
         
         $uri = sprintf('%s?%s', $this->getApiUri('set_bucket_private', 'uc'), http_build_query(['bucket' => $bucket, 'private' => $private]));
-        $response = $this->send( $uri, self::POST_METHOD );
         
-        dd($response);
+        return $this->send( $uri, self::POST_METHOD );
     }
     
     /**
@@ -100,8 +93,6 @@ final class BucketManager extends IcloudAbstract
     {
         $uri = sprintf($this->getApiUri($type, 'api'), $begin, $end);
         
-        $response = $this->send( $uri, self::GET_METHOD );
-        
-        dd($response->getBody()->getContents());
+        return $this->send( $uri, self::GET_METHOD );
     }
 }

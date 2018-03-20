@@ -21,8 +21,7 @@ final class BucketManager extends IcloudAbstract
     {
         $uri = sprintf($this->getApiUri('folder', 'v0'),  $bucket . $directory );
 
-        $response = $this->send($uri, self::POST_METHOD);
-        dd($response);
+        return $this->send($uri, self::POST_METHOD);
     }
     
     /**
@@ -34,9 +33,7 @@ final class BucketManager extends IcloudAbstract
     {
         $uri = sprintf($this->getApiUri('drop_dir', 'v0'), $bucket . $directory );
 
-        $response = $this->send($uri, self::DEL_METHOD);
-        dd($response);
-        
+        return $this->send($uri, self::DEL_METHOD);
     }
     
     /**
@@ -50,8 +47,8 @@ final class BucketManager extends IcloudAbstract
     public function list(string $bucket, string $directory, array $options = ['x-list-limit' => 1])
     {
         $uri = sprintf($this->getApiUri('dir_list', 'v0'), $bucket . $directory );
-        $response = $this->send($uri, self::GET_METHOD, $options);
-        dd($response->getHeaders());
+        
+        return $this->send($uri, self::GET_METHOD, $options);
     }
     
     /**
@@ -63,8 +60,8 @@ final class BucketManager extends IcloudAbstract
     public function usage(string $bucket)
     {
         $uri = sprintf($this->getApiUri('usage', 'v0'), $bucket );
-        $response = $this->send($uri, self::GET_METHOD);
-        dd($response->getBody());
+        
+        return $this->send($uri, self::GET_METHOD);
     }
     
     /**
@@ -77,8 +74,8 @@ final class BucketManager extends IcloudAbstract
     public function deleteFile(string $bucket, string $fileDir)
     {
         $uri = sprintf($this->getApiUri('del_file', 'v0'), $bucket, $fileDir );
-        $response = $this->send($uri, self::DEL_METHOD);
-        dd($response);
+        
+        return $this->send($uri, self::DEL_METHOD);
     }
     
     /**
@@ -92,8 +89,6 @@ final class BucketManager extends IcloudAbstract
     {
         $uri = sprintf($this->getApiUri('down_file', 'v0'), $bucket, $fileDir );
         
-        $response = $this->send($uri, self::GET_METHOD, ['stream' => true]);
-        
-        dd($response);
+        return $this->send($uri, self::GET_METHOD, ['stream' => true]);
     }
 }
