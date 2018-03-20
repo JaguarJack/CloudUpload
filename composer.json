@@ -8,6 +8,17 @@
             "email": "wuyanwen1992@gmail.com"
         }
     ],
+    "homepage" : "https://www.njphper.com",
+    "autoload" : {
+		"psr-4" : {
+			"Lizyu\\Permission\\" : "src/"
+		}
+	},
+    "keywords" : [
+		"icloud",
+		"upload",
+		"laravel"
+	]
     "minimum-stability": "dev",
     "require": {}
 }
