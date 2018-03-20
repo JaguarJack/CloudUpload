@@ -1,11 +1,11 @@
 {
     "name": "lizyu/icloud",
-    "description": "about ocloud\u001b[D\u001b[D\u001b[D\u001b[D\u001b[i",
+    "description": "about cloud upload",
     "license": "MIT",
     "authors": [
         {
             "name": "yanwenwu",
-            "email": "82664165@qq.com"
+            "email": "wuyanwen1992@gmail.com"
         }
     ],
     "minimum-stability": "dev",
