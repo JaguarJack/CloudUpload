@@ -24,7 +24,7 @@ class Icloud
             }
         }
         
-        throw NotFoundException::NotFoundMethod("The Driver {$this->dirver} Dont Provider Method {$method}");
+        throw NotFoundException::NotFoundMethod("The Driver {$dirver} Dont Provider Method {$method}");
     }
     
    /**

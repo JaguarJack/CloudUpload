@@ -26,6 +26,13 @@ class NotFoundException extends \Exception
         return new static($msg, $code, null);
     }
     
+    /**
+     * @description:扩展未找到
+     * @author wuyanwen(2018年3月20日)
+     * @param string $msg
+     * @param number $code
+     * @return \Lizyu\Icloud\Exceptions\NotFoundException
+     */
     public static function NotFoundExtension(string $msg, $code = 404)
     {
         return new static($msg, $code, null);

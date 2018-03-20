@@ -7,6 +7,7 @@ use Lizyu\Icloud\Icloud;
 use Lizyu\Icloud\Qiniu\BucketManager as QiniuBucket;
 use Lizyu\Icloud\Qiniu\Object;
 use Lizyu\Icloud\Upyun\BucketManager as UpyunBucket;
+use Lizyu\Icloud\Upyun\ResourceManager;
 
 class IcloudServiceProvider extends ServiceProvider
 {
@@ -29,7 +30,7 @@ class IcloudServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerQiniuService();
-        $this->registerQiniuService();
+        $this->registerUpyunService();
         $this->app->bind('icloud', function($app){
             return new Icloud($app);
         });
@@ -62,8 +63,11 @@ class IcloudServiceProvider extends ServiceProvider
         $this->app->bind('upyunBucket', function(){
             return new UpyunBucket();
         });
-        
-        $this->app->tag(['upyunBucket'], 'upyun');
+        $this->app->bind('upyunResource', function(){
+            return new ResourceManager();
+        });
+            
+        $this->app->tag(['upyunBucket', 'upyunResource'], 'upyun');
     }
     
     protected function publishConfig()

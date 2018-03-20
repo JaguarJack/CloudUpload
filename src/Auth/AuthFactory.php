@@ -8,7 +8,7 @@ class AuthFactory
      * @description:创建对象
      * @author: wuyanwen <wuyanwen1992@gmail.com>
      * @date:2018年3月19日
-     * @param unknown $name
+     * @param $name $name
      * @param unknown ...$argument
      * @return unknown
      */

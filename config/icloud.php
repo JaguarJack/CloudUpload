@@ -51,6 +51,7 @@ return [
         'uc'    => 'uc.qbox.me',
         'rsf'   => 'rsf.qbox.me',
         'iovip' => 'iovip.qbox.me',
+        'up'    => 'up.qiniu.com',
         //又拍host
         'v0'    => 'v0.api.upyun.com',
         'v1'    => 'v1.api.upyun.com',
