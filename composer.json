@@ -18,7 +18,7 @@
 		"icloud",
 		"upload",
 		"laravel"
-	]
+	],
     "minimum-stability": "dev",
     "require": {}
 }
