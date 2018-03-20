@@ -11,7 +11,7 @@
     "homepage" : "https://www.njphper.com",
     "autoload" : {
 		"psr-4" : {
-			"Lizyu\\Permission\\" : "src/"
+			"Lizyu\\Icloud\\" : "src/"
 		}
 	},
     "keywords" : [
