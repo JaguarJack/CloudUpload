@@ -7,8 +7,8 @@ return [
     
     /* 七牛配置信息 */
     'qiniu'  => [
-        'qiNiuKey'    => 'dw1jkmtSNjxyPkMdyBfVeaWzCAOiMSOTk35adV8W',
-        'qiNiuSecret' => '_KfsmnV8d-rlYtABD27xF7y-ZNxblvdk9_VVZ67g',
+        'qiNiuKey'    => '',
+        'qiNiuSecret' => '',
         
         //上传策略字段，上传凭证校验使用
         'policyFields' => [
@@ -37,10 +37,10 @@ return [
     
     /* 又拍云配置信息 */
     'upyun'  =>  [
-        'opreator'  => 'wuyanwen',
-        'password'  => 'zxcv147852',
+        'opreator'  => '',
+        'password'  => '',
         
-        'buckets'   => ['testnjphper'],
+        'buckets'   => [''],
     ],
     
     //api接口
